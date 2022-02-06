@@ -33,6 +33,8 @@ async def on_guild_join(guild):
 async def on_message(message):
 	if message.content.startswith('&utProsim'):
 		embed = discord.Embed(title = "ut prosim", url = "https://give.vt.edu/giving-societies/ut-prosim-society.html", description = "that I may serve! go hokies!", color = discord.Color.gold())
+		channel = message.channel
+		await channel.send(embed=embed)
 	if message.content.startswith('&setThisChannel'):
 			global channelIdentity
 			channelIdentity = message.channel
