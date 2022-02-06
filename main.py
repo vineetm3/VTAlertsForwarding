@@ -4,7 +4,6 @@ import tweepy
 from keepItAlive import keepAlive
 from discord.ext import commands
 from threading import Thread
-from discord.utils import find
 import time
 
 client = discord.Client() 
