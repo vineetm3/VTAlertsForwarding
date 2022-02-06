@@ -12,7 +12,7 @@ intents = discord.Intents.all()
 intents.members = True
 lastTweet = None
 firstRun = True
-
+channelIdentity = 0
 
 client = commands.Bot(command_prefix='&', intents=intents)
 
@@ -24,9 +24,17 @@ async def on_ready():
 #Basic interactive in channel 
 @client.event
 async def on_message(message):
+	if message.content.startswith('&setChannel'):
+			global channelIdentity
+			channelIdentity = message.channel
+			embed=discord.Embed(title="channel set", url="", description = "the channel has been set", color=discord.Color.green())
+			channel = message.channel
+			await channel.send(embed=embed)
 	if message.content.startswith('&help'):
-		embed=discord.Embed(title="help", url="https://github.com/mbrenn07/HackViolet2022#readme", description = """
+		embed=discord.Embed(title="help", url="https://github.com/mbrenn07/VTAlertsForwarding#readme", description = """
 		- use $latest @[handle] to get the latest tweet of the specified account
+    
+    - use $setChannel to use the bot in this channel 
 		""", color=discord.Color.green())
 		channel = message.channel
 		await channel.send(embed=embed)
@@ -69,8 +77,9 @@ for tweet in tweets:
 print("Total Tweets Fetched:", len(tweets_copy))
 
 async def printHelper(tmp):
+	global channelIdentity
 	await client.wait_until_ready()
-	channel = client.get_channel(939615174799790112) # channel ID goes here
+	channel = client.get_channel() # channel ID goes here
 	embed=discord.Embed(title="vt alerts tweet", url="https://twitter.com/vtalerts?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor", description = tmp, color=discord.Color.orange())
 	await channel.send(embed=embed)
 
@@ -87,7 +96,7 @@ def get_tweets(username):
 class BackgroundTimer(Thread):
 	def run(self):
 		while 1:
-			get_tweets("mgbparrot")
+			get_tweets("vtalerts")
 			time.sleep(60)
 
 timer = BackgroundTimer()

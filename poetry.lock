@@ -262,6 +262,7 @@ numpy = [
     {version = ">=1.18.5", markers = "platform_machine != \"aarch64\" and platform_machine != \"arm64\" and python_version < \"3.10\""},
     {version = ">=1.19.2", markers = "platform_machine == \"aarch64\" and python_version < \"3.10\""},
     {version = ">=1.20.0", markers = "platform_machine == \"arm64\" and python_version < \"3.10\""},
+    {version = ">=1.21.0", markers = "python_version >= \"3.10\""},
 ]
 python-dateutil = ">=2.8.1"
 pytz = ">=2020.1"
@@ -461,8 +462,8 @@ multidict = ">=4.0"
 
 [metadata]
 lock-version = "1.1"
-python-versions = ">=3.8.0,<3.9"
-content-hash = "750f505dbb75df9d4e89b16dd6b057b8d09e68a361447bcfa34d877ddd2e01ec"
+python-versions = "^3.8"
+content-hash = "6bdc6a698a6311e1cb9d88c357e26d0c7e99f4ed2f14d8720906047c70ec554a"
 
 [metadata.files]
 aiohttp = [
