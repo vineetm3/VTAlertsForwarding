@@ -13,6 +13,8 @@ intents.members = True
 lastTweet = None
 firstRun = True
 channelIdentity = 0
+initialChannel = 0
+channelSet = False
 
 client = commands.Bot(command_prefix='&', intents=intents)
 
@@ -24,9 +26,13 @@ async def on_ready():
 #Basic interactive in channel 
 @client.event
 async def on_message(message):
+	global initialChannel 
+	if(initialChannel == 0):
+		initialChannel = message.channel
 	if message.content.startswith('&setChannel'):
 			global channelIdentity
 			channelIdentity = message.channel
+			channelSet = True
 			embed=discord.Embed(title="channel set", url="", description = "the channel has been set", color=discord.Color.green())
 			channel = message.channel
 			await channel.send(embed=embed)
@@ -78,10 +84,14 @@ print("Total Tweets Fetched:", len(tweets_copy))
 
 async def printHelper(tmp):
 	global channelIdentity
-	await client.wait_until_ready()
-	channel = client.get_channel() # channel ID goes here
-	embed=discord.Embed(title="vt alerts tweet", url="https://twitter.com/vtalerts?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor", description = tmp, color=discord.Color.orange())
-	await channel.send(embed=embed)
+	global initialChannel
+	if channelIdentity != 0:
+		await client.wait_until_ready()
+		channel = client.get_channel() # channel ID goes here
+		embed=discord.Embed(title="vt alerts tweet", url="https://twitter.com/vtalerts?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor", description = tmp, color=discord.Color.orange())
+		await channel.send(embed=embed)
+	else:
+		await initialChannel.send("Use &setChannel to set up which channel the latest VT alerts appear in")
 
 def get_tweets(username):
 	global lastTweet
