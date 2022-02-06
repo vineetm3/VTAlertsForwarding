@@ -4,6 +4,7 @@ import tweepy
 from keepItAlive import keepAlive
 from discord.ext import commands
 from threading import Thread
+from discord.utils import find
 import time
 
 client = discord.Client() 
@@ -13,7 +14,6 @@ intents.members = True
 lastTweet = None
 firstRun = True
 channelIdentity = 0
-initialChannel = 0
 channelSet = False
 
 client = commands.Bot(command_prefix='&', intents=intents)
@@ -23,24 +23,29 @@ client = commands.Bot(command_prefix='&', intents=intents)
 async def on_ready():
   print ('We have logged in as {0.user}'.format(client))
 
+@client.event
+async def on_guild_join(guild):
+  embed=discord.Embed(title="VT Alerts Forwarder", url="https://github.com/mbrenn07/VTAlertsForwarding#readme", description = "use &setThisChannel to set the bot's alerts to output in that channel", color=discord.Color.green())
+  await guild.text_channels[0].send(embed=embed)
+
 #Basic interactive in channel 
 @client.event
 async def on_message(message):
-	global initialChannel 
-	if(initialChannel == 0):
-		initialChannel = message.channel
-	if message.content.startswith('&setChannel'):
+	if message.content.startswith('&utProsim'):
+		embed = discord.Embed(title = "ut prosim", url = "https://give.vt.edu/giving-societies/ut-prosim-society.html", description = "that I may serve! go hokies!", color = discord.Color.gold())
+	if message.content.startswith('&setThisChannel'):
 			global channelIdentity
 			channelIdentity = message.channel
-			channelSet = True
 			embed=discord.Embed(title="channel set", url="", description = "the channel has been set", color=discord.Color.green())
 			channel = message.channel
 			await channel.send(embed=embed)
 	if message.content.startswith('&help'):
 		embed=discord.Embed(title="help", url="https://github.com/mbrenn07/VTAlertsForwarding#readme", description = """
-		- use $latest @[handle] to get the latest tweet of the specified account
+		- use &latest @[handle] to get the latest tweet of the specified account
     
-    - use $setChannel to use the bot in this channel 
+    - use &setThisChannel to use the bot in this channel 
+
+		- use &utProsim to display your hokie pride
 		""", color=discord.Color.green())
 		channel = message.channel
 		await channel.send(embed=embed)
@@ -52,7 +57,7 @@ async def on_message(message):
 		await channel.send(embed=embed)
 	elif message.content.startswith('&latest'):
 		channel = message.channel
-		await channel.send("what is the twitter handle you would like the latest message of?, use $latest @[handle]")
+		await channel.send("what is the twitter handle you would like the latest message of?, use &latest @[handle]")
     
 # Twitter Keys
 consumer_key = os.getenv('consumer_key')
@@ -83,15 +88,11 @@ for tweet in tweets:
 print("Total Tweets Fetched:", len(tweets_copy))
 
 async def printHelper(tmp):
-	global channelIdentity
-	global initialChannel
 	if channelIdentity != 0:
 		await client.wait_until_ready()
-		channel = client.get_channel() # channel ID goes here
+		channel = channelIdentity # channel ID goes here
 		embed=discord.Embed(title="vt alerts tweet", url="https://twitter.com/vtalerts?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor", description = tmp, color=discord.Color.orange())
 		await channel.send(embed=embed)
-	else:
-		await initialChannel.send("Use &setChannel to set up which channel the latest VT alerts appear in")
 
 def get_tweets(username):
 	global lastTweet
@@ -106,7 +107,7 @@ def get_tweets(username):
 class BackgroundTimer(Thread):
 	def run(self):
 		while 1:
-			get_tweets("vtalerts")
+			get_tweets("mgbparrot")
 			time.sleep(60)
 
 timer = BackgroundTimer()
