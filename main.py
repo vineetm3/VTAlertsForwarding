@@ -6,6 +6,7 @@ from discord.ext import commands
 from threading import Thread
 import time
 
+#Field variables used in fucntions 
 client = discord.Client() 
 token = os.getenv('token')
 intents = discord.Intents.all()
@@ -15,6 +16,7 @@ firstRun = True
 channelIdentity = 0
 channelSet = False
 
+#This line tells that all commands will begin with '&'
 client = commands.Bot(command_prefix='&', intents=intents)
 
 #Tells us if the bot is up and running in console 
@@ -22,12 +24,13 @@ client = commands.Bot(command_prefix='&', intents=intents)
 async def on_ready():
   print ('We have logged in as {0.user}'.format(client))
 
+#Each time Bot is added to a new server, it will run in the first channel of the server 
 @client.event
 async def on_guild_join(guild):
   embed=discord.Embed(title="VT Alerts Forwarder", url="https://github.com/mbrenn07/VTAlertsForwarding#readme", description = "use &setThisChannel to set the bot's alerts to output in that channel", color=discord.Color.green())
   await guild.text_channels[0].send(embed=embed)
 
-#Basic interactive in channel 
+#All commands with their embedded links - begin with '&'
 @client.event
 async def on_message(message):
 	if message.content.startswith('&utProsim'):
@@ -60,7 +63,7 @@ async def on_message(message):
 		channel = message.channel
 		await channel.send("what is the twitter handle you would like the latest message of?, use &latest @[handle]")
     
-# Twitter Keys
+# Twitter Keys for authentication 
 consumer_key = os.getenv('consumer_key')
 consumer_secret = os.getenv('consumer_secret')
 access_token = os.getenv('access_token')
@@ -70,24 +73,14 @@ auth = tweepy.OAuthHandler(consumer_key, consumer_secret)
 auth.set_access_token(access_token, access_token_secret)
 api = tweepy.API(auth, wait_on_rate_limit = True)
 
+#Ensuring that the connection was sucessful with Tweepy
 try:
     api.verify_credentials()
     print('Successful Authentication')
 except:
     print('Failed authentication')
 
-search_words = "#virginia tech"
-
-tweets = tweepy.Cursor(api.search_tweets,
-              q=search_words,
-              lang="en").items(20)
-
-tweets_copy = []
-for tweet in tweets:  
-    tweets_copy.append(tweet)
-
-print("Total Tweets Fetched:", len(tweets_copy))
-
+#printHelper method that sends VT alerts to the channel indicated
 async def printHelper(tmp):
 	if channelIdentity != 0:
 		await client.wait_until_ready()
@@ -95,6 +88,7 @@ async def printHelper(tmp):
 		embed=discord.Embed(title="vt alerts tweet", url="https://twitter.com/vtalerts?ref_src=twsrc%5Egoogle%7Ctwcamp%5Eserp%7Ctwgr%5Eauthor", description = tmp, color=discord.Color.orange())
 		await channel.send(embed=embed)
 
+#The main printing method that will be run every 60 seconds. Checks if the tweet is new or not. It if is a newly updated tweet, it will be sent to printHelper() where it is sent to the discord channel. 
 def get_tweets(username):
 	global lastTweet
 	global firstRun
@@ -104,15 +98,16 @@ def get_tweets(username):
 	lastTweet = tweets[0]
 	firstRun = False
 
-
+#The BackgroundTimer(Thread) class that runs periodically to update tweets live to the discord server with a maximum delay of 60 seconds
 class BackgroundTimer(Thread):
 	def run(self):
 		while 1:
-			get_tweets("mgbparrot")
+			get_tweets("vtalerts")
 			time.sleep(60)
 
 timer = BackgroundTimer()
 timer.start() 
 
+#Keeps the server + bot up and running 
 keepAlive()
 client.run(token)
